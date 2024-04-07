@@ -10,7 +10,7 @@ devices.yml
 /logs/
 
 #Output
-/output/
+/reports/
 
 #Environment variables
 .env

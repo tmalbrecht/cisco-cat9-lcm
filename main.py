@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 import yaml
 import logging
 import os
+from openpyxl import Workbook
+from openpyxl import load_workbook
 
 
 # load yaml file with all network devices
@@ -28,16 +30,27 @@ def get_time():
     return time
 
 
-# write output to a file
-def write_output(filename, output, device_name):
+def create_xlsx(filename):
+    wb = Workbook()
+    ws = wb.create_sheet(title="Software")
+    header = ["Device", "Software"]
+    ws.append(header)
+    ws.auto_filter.ref = "A1:B1"
+    ws = wb.create_sheet(title="Serial and Mac")
+    ws = wb.create_sheet(title="License")
+    if "Sheet" in wb.sheetnames:
+        std = wb["Sheet"]
+        wb.remove(std)
+    wb.save(filename)
+
+
+def write_output_xlsx(filename, output, device_name):
     version = output["version"]["version"]
-    with open(filename, "a") as file:
-        file.write("\n\n")
-        file.write("*" * 200)
-        file.write(f"\nOutput device: {device_name}\n")
-        file.write("*" * 200)
-        file.write("\n\n")
-        file.write(f"Software version: {version}")
+    row = [device_name, version]
+    wb = load_workbook(filename)
+    custom_sheet = wb["Software"]
+    custom_sheet.append(row)
+    wb.save(filename)
 
 
 # handle connection to network device
@@ -48,7 +61,7 @@ def connect_to_device(device, username, password, device_name, filename):
     net_connect = ConnectHandler(**device)
     print(net_connect.find_prompt())
     output = net_connect.send_command("show version", use_genie=True)
-    write_output(filename, output, device_name)
+    write_output_xlsx(filename, output, device_name)
     net_connect.disconnect()
 
 
@@ -66,10 +79,11 @@ if __name__ == "__main__":
     password = os.getenv("PASSWORD") if os.getenv("PASSWORD") else getpass()
 
     # set filename for the txt file with all output show commands, inlcude timestamp to make it unique and traceable
-    filename = "output/output_" + get_time()
+    filename = "reports/LCM_REPORT_CISCO_CAT9_" + get_time() + ".xlsx"
+    report = create_xlsx(filename)
 
     # Enable detailed logging for Netmiko
-    logging.basicConfig(filename=f"logs/detailed/{get_time()}", level=logging.DEBUG)
+    # logging.basicConfig(filename=f"logs/detailed/{get_time()}", level=logging.DEBUG)
     logger = logging.getLogger("netmiko")
 
     # load all devices in a dictionary variable
