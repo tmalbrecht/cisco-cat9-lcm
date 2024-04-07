@@ -1,0 +1,17 @@
+todo.txt
+
+# Python virtual environment
+.venv
+
+# Device database
+devices.yml
+
+#Logs
+/logs/
+
+#Output
+/output/
+
+#Environment variables
+.env
+
