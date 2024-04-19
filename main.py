@@ -39,14 +39,24 @@ def get_time():
 def create_xlsx(filename):
     wb = Workbook()
     ws = wb.create_sheet(title="General")
-    header = ["Device","Software","Uptime"]
+    header = ["Device", "Software", "Model", "Uptime"]
+    ws.append(header)
+    ws.auto_filter.ref = "A1:D1"
+    ws = wb.create_sheet(title="Serial and Mac")
+    header = ["Device", "Mac", "SN"]
     ws.append(header)
     ws.auto_filter.ref = "A1:C1"
-    ws = wb.create_sheet(title="Serial and Mac")
-    header = ["Device","Mac"]
-    ws.append(header)
-    ws.auto_filter.ref = "A1:B1"
     ws = wb.create_sheet(title="License")
+    header = [
+        "Device",
+        "Smart Licensing",
+        "Transport",
+        "Last ACK",
+        "Trust code installed",
+    ]
+    ws.append(header)
+    ws.auto_filter.ref = "A1:C1"
+
     if "Sheet" in wb.sheetnames:
         std = wb["Sheet"]
         wb.remove(std)
@@ -59,31 +69,63 @@ def write_output_xlsx(filename, output_list, device_name):
     version = "unknown"
     uptime = "unknown"
     mac_address = "unknown"
+    sn = "unknown"
+    model = "unknown"
+    lic_smart_status = "unknown"
+    lic_transport_type = "unknown"
+    lic_last_ack = "unknown"
+    lic_trust_code = "unknown"
+    wb = load_workbook(filename)
+    custom_sheet = wb["Serial and Mac"]
+
     for output in output_list:
         if output:
             if "version" in output:
-                version = output["version"]["version"]
+                switches = output["version"]["switch_num"]
+                version = output["version"]["xe_version"]
+                model = output["version"]["chassis"]
                 uptime = output["version"]["uptime"]
-            elif "switch" in output:
-                mac_address = output["switch"]["mac_address"]
-    row_general = [device_name, version, uptime]
-    row_sr_mac = [device_name, mac_address]
-    wb = load_workbook(filename)
+                for device_id in switches:
+                    device_info = switches[device_id]
+                    mac_address = device_info["mac_address"]
+                    sn = device_info["system_sn"]
+                    row_sr_mac = [device_name, mac_address, sn]
+                    custom_sheet.append(row_sr_mac)
+            elif "smart_licensing_status" in output:
+                lic_smart_status = output["smart_licensing_status"][
+                    "smart_licensing_using_policy"
+                ]["status"]
+                lic_transport_type = output["smart_licensing_status"]["transport"][
+                    "type"
+                ]
+                lic_last_ack = output["smart_licensing_status"]["usage_reporting"][
+                    "last_ack_received"
+                ]
+
+    row_general = [device_name, version, model, uptime]
     custom_sheet = wb["General"]
     custom_sheet.append(row_general)
-    custom_sheet = wb["Serial and Mac"]
-    custom_sheet.append(row_sr_mac)
+    row_license = [
+        device_name,
+        lic_smart_status,
+        lic_transport_type,
+        lic_last_ack,
+        lic_trust_code,
+    ]
+    custom_sheet = wb["License"]
+    custom_sheet.append(row_license)
     wb.save(filename)
     logging.info("Output is processed and written to xlsx file.")
 
-def send_command(net_connect,command):
+
+def send_command(net_connect, command):
     output = net_connect.send_command(command, use_genie=True)
     if isinstance(output, str):
         logging.error(
             f"Failed to get output from the command: <{command}>. Possibly the command syntax is wrong or unknown in the Cisco Genie library.",
             exc_info=True,
         )
-        output =  False
+        output = False
     return output
 
 
@@ -98,11 +140,11 @@ def connect_to_device(device, username, password, device_name, filename):
     logging.info("*" * 60)
     net_connect = ConnLogOnly(**device)
     output_list = []
-    cmd_list = ["show version","show switch"]
+    cmd_list = ["show version", "show license all"]
     cmd_ok = True
     if net_connect:
         for cmd in cmd_list:
-            output = send_command(net_connect,cmd)
+            output = send_command(net_connect, cmd)
             output_list.append(output)
             if not output:
                 cmd_ok = False
@@ -125,9 +167,7 @@ def get_username():
 
 def create_email_body(devices_no_connect):
     if devices_no_connect:
-        email_body = (
-            "Couldn't connect or retrieve desired information from the following device(s): "
-        )
+        email_body = "Couldn't connect or retrieve desired information from the following device(s): "
         for device in devices_no_connect:
             email_body += f"\n  *{device}"
         email_body += "\nCheck logging for more details."
@@ -154,7 +194,6 @@ def send_email(filename, devices_no_connect, filename_logs):
     message["To"] = receiver_email
     message["Subject"] = "LCM Report Cisco Catalyst"
     message.attach(MIMEText(email_body, "plain"))
-    
 
     # Attach file
     filenames = [filename]
@@ -167,14 +206,14 @@ def send_email(filename, devices_no_connect, filename_logs):
                 part.set_payload(file.read())
                 encoders.encode_base64(part)
                 part.add_header(
-                "Content-Disposition",
-                f'attachment; filename="{file_to_attach.split("/")[-1]}"',
-            )
+                    "Content-Disposition",
+                    f'attachment; filename="{file_to_attach.split("/")[-1]}"',
+                )
             message.attach(part)
             logging.info(f"Successfully added attachment {file_to_attach} to email")
         except Exception:
             logging.error(f"Failed to attach {file_to_attach} to email", exc_info=True)
-    
+
     try:
         with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.starttls()  # Upgrade the connection to TLS
@@ -183,6 +222,7 @@ def send_email(filename, devices_no_connect, filename_logs):
             logging.info("Email sent successfully with attachment")
     except Exception:
         logging.error("Failed to send email", exc_info=True)
+
 
 if __name__ == "__main__":
     start_time = datetime.now()
@@ -226,4 +266,3 @@ if __name__ == "__main__":
     # Add total runtime script to logging
     end_time = datetime.now()
     logging.info(f"\n\nScript execution time: {end_time - start_time}\n\n")
-
