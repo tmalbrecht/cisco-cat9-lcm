@@ -87,6 +87,8 @@ Navigate into the project directory and execute main.py:
 $ python main.py
 ```
 
+If you have not filled in any credentials for switch login inside the .env file it will prompt you for the credentials. For password getpass() is used to keep it hidden.
+
 Check your email. The generated xlsx file will also be stored in the /reports/ directory inside the code directory. Check logs if there are any issues.
 
 
