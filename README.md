@@ -38,7 +38,7 @@ The code can deal with chassis and stacked switches. If a switch is a stack it w
 The things you need before installing the software:
 
 * Linux environment: The code uses the pyATS Genie library for parsing. Genie is only supported in Linux.
-* Python 3.11.0rc1 (code is developed in this version, didn't test it in other versions)
+* Python 3.11.0rc1 (code is developed in this version, didn't test it in other versions but anything older should be fine)
 * Check the requirements.txt file for all the libraries you need, best practice is to use a seperate venv.
   
 ### Installation
