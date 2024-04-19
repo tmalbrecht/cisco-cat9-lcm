@@ -1,7 +1,6 @@
 [![python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org)
 ![Repo Size](https://img.shields.io/github/repo-size/Sulstice/global-chem)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
 # Life Cycle Management for Cisco Catalyst 9000 switches
 
