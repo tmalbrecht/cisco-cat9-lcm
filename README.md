@@ -139,9 +139,14 @@ Navigate into the project directory and execute main.py:
 python main.py
 ```
 
-If you haven't entered any credentials for switch login or email paswword in the .env file, you will be prompted to provide them. The getpass() function is used to ensure that your passwords remain hidden.
+If you haven't entered any credentials for switch login in the .env file, you will be prompted to provide them. The getpass() function is used to ensure that your passwords remain hidden.
 
 After you will get prompted with the question if you want to send an email with the report or not.
+
+If you haven't entered an email password in the .env file, you will be prompted to provide it. The getpass() function is used to ensure that your passwords remain hidden.
+
+See example output below:
+
 
 Please check your email for the generated Excel file, which is also saved in the /reports/ directory within the code directory. Refer to the logs for any issues that may have occurred.
 
