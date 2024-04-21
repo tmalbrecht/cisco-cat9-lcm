@@ -15,4 +15,7 @@ devices.yml
 #Environment variables
 .env
 
+#images
+/images/
+
 todo.txt
