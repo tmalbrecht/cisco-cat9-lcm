@@ -129,6 +129,13 @@ The following logs are created:
 
 If the script fails to retrieve information from one or more switches, the detailed log file is included in the email notification. 
 
+
+Some example output from the detailed log:
+
+![Alt text](https://github.com/tmalbrecht/cisco-cat9-lcm/blob/master/images/example_log_detailed.JPG)
+
+
+
 The filename for the detailed logs includes a timestamp indicating when the script was executed. Session logs are named using the device name followed by a timestamp that marks the exact moment the connection was made with the switch.
 
 ## Usage
@@ -145,7 +152,9 @@ After you will get prompted with the question if you want to send an email with 
 
 If you haven't entered an email password in the .env file, you will be prompted to provide it. The getpass() function is used to ensure that your passwords remain hidden.
 
-See example output below:
+See below for example output:
+
+![Alt text](https://github.com/tmalbrecht/cisco-cat9-lcm/blob/master/images/example_output.JPG)
 
 
 Please check your email for the generated Excel file, which is also saved in the /reports/ directory within the code directory. Refer to the logs for any issues that may have occurred.
