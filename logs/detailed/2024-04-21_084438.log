@@ -1,0 +1,44 @@
+2024-04-21 08:44:38,210 INFO root LCM report file created in xlsx file type.
+2024-04-21 08:44:38,211 INFO root ************************************************************
+2024-04-21 08:44:38,211 INFO root Starting connection to device: cisco_1 (192.168.178.45)
+2024-04-21 08:44:38,211 INFO root ************************************************************
+2024-04-21 08:44:38,235 INFO paramiko.transport Connected (version 2.0, client Cisco-1.25)
+2024-04-21 08:44:38,565 INFO paramiko.transport Authentication (password) successful!
+2024-04-21 08:44:38,823 INFO netmiko.ssh_dispatcher Netmiko connection succesful to 192.168.178.45:22
+2024-04-21 08:44:39,778 INFO root Output is processed and written to xlsx file.
+2024-04-21 08:44:39,789 INFO root Successfully closed connection to device: cisco_1 (192.168.178.45)
+2024-04-21 08:44:39,789 INFO root ************************************************************
+2024-04-21 08:44:39,789 INFO root Starting connection to device: cisco_2 (192.168.178.46)
+2024-04-21 08:44:39,789 INFO root ************************************************************
+2024-04-21 08:44:39,810 INFO paramiko.transport Connected (version 2.0, client Cisco-1.25)
+2024-04-21 08:44:40,135 INFO paramiko.transport Authentication (password) successful!
+2024-04-21 08:44:40,386 INFO netmiko.ssh_dispatcher Netmiko connection succesful to 192.168.178.46:22
+2024-04-21 08:44:40,622 INFO root Output is processed and written to xlsx file.
+2024-04-21 08:44:40,633 INFO root Successfully closed connection to device: cisco_2 (192.168.178.46)
+2024-04-21 08:44:40,633 INFO root ************************************************************
+2024-04-21 08:44:40,633 INFO root Starting connection to device: cisco_3 (192.168.178.50)
+2024-04-21 08:44:40,633 INFO root ************************************************************
+2024-04-21 08:44:43,331 ERROR netmiko.ssh_dispatcher Netmiko was unable to reach the provided host and port: 192.168.178.50:22
+
+TCP connection to device failed.
+
+Common causes of this problem are:
+1. Incorrect hostname or IP address.
+2. Wrong TCP port.
+3. Intermediate firewall blocking access.
+
+Device settings: cisco_xe 192.168.178.50:22
+
+
+2024-04-21 08:44:43,349 INFO root Output is processed and written to xlsx file.
+2024-04-21 08:44:43,350 INFO root Couldn't connect or retrieve desired information from the following device(s): 
+  *cisco_3
+Check logging for more details.
+2024-04-21 08:44:43,350 INFO root Successfully added attachment reports/LCM_REPORT_CISCO_CAT9_2024-04-21_08:44:38.xlsx to email
+2024-04-21 08:44:43,350 INFO root Successfully added attachment logs/detailed/2024-04-21_08:44:38.log to email
+2024-04-21 08:44:43,854 INFO root Email sent successfully with attachment
+2024-04-21 08:44:43,879 INFO root 
+
+Script execution time: 0:00:05.679743
+
+
