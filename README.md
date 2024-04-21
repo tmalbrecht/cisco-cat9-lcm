@@ -98,14 +98,18 @@ nano devices.yml
 
 Enter your credentials and email details into the file as shown below; you can copy and paste them directly into nano:
 ```
-# Credentials used for login into the switches by ssh
-PASSWORD_SSH ="username"
-USERNAME_SSH ="password"
+# Credentials used for login into the switches by ssh.
+# Leave blank if you don't want to store them here for security reasons.
+# The script will prompt you when excuting it
+PASSWORD_SSH =""
+USERNAME_SSH =""
 
-# Details needed for sending the email
-SENDER_EMAIL = "email@example.nl"
-PASSWORD_EMAIL = "your email password"
+# Details needed for sending the email.
+# Leave password blank if you don't want to store them here for security reasons.
+# The script will prompt you when excuting it.
 RECEIVER_EMAIL = "email@example.nl"
+SENDER_EMAIL = "email@example.nl"
+PASSWORD_EMAIL = ""
 SMTP_SERVER = "smtp.your_server.com"
 SMTP_PORT = "587"
 ```
@@ -113,7 +117,7 @@ Close the file by typing ctrl + x, type 'y' and after press enter.
 
 ## Security 
 
-Please ensure that your credentials and email details are not stored in a script within a directory where others have read permissions. If the SSH login credentials for the switch are not specified in the .env file, you will be prompted to enter them. The getpass() function is used to securely handle your password, ensuring it remains hidden at all times.
+Please ensure that your credentials and email details are not stored in a script within a directory where others have read permissions. If the SSH login credentials for the switch are not specified in the .env file, you will be prompted to enter them when executing the script. The getpass() function is used to securely handle your password, ensuring it remains hidden at all times.
 
 ## Logging
 
