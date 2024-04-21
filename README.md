@@ -117,7 +117,7 @@ Close the file by typing ctrl + x, type 'y' and after press enter.
 
 ## Security 
 
-Please ensure that your credentials and email details are not stored in a script within a directory where others have read permissions. If the SSH login credentials for the switch are not specified in the .env file, you will be prompted to enter them when executing the script. The getpass() function is used to securely handle your password, ensuring it remains hidden at all times.
+Please ensure that your credentials and email details are not stored in a script within a directory where others have read permissions. If the SSH login credentials for the switch and email password are not specified in the .env file, you will be prompted to enter them when executing the script. The getpass() function is used to securely handle your passwords, ensuring it remains hidden at all times.
 
 ## Logging
 
@@ -139,7 +139,7 @@ Navigate into the project directory and execute main.py:
 $ python main.py
 ```
 
-If you haven't entered any credentials for switch login in the .env file, you will be prompted to provide them. The getpass() function is used to ensure that your password remains hidden.
+If you haven't entered any credentials for switch login or email paswword in the .env file, you will be prompted to provide them. The getpass() function is used to ensure that your passwords remain hidden.
 
 Please check your email for the generated Excel file, which is also saved in the /reports/ directory within the code directory. Refer to the logs for any issues that may have occurred.
 
