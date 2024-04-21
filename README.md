@@ -136,7 +136,7 @@ The filename for the detailed logs includes a timestamp indicating when the scri
 Navigate into the project directory and execute main.py:
 
 ```
-$ python main.py
+python main.py
 ```
 
 If you haven't entered any credentials for switch login or email paswword in the .env file, you will be prompted to provide them. The getpass() function is used to ensure that your passwords remain hidden.
