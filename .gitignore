@@ -7,9 +7,11 @@ todo.txt
 devices.yml
 
 #Logs
+/logs/
 *.log
 
-#Output
+#Reports
+/reports/
 *.xlsx
 
 #Environment variables

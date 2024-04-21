@@ -195,6 +195,9 @@ def send_email(filename, devices_no_connect, filename_logs):
     message["Subject"] = "LCM Report Cisco Catalyst"
     message.attach(MIMEText(email_body, "plain"))
 
+    # Command line output with result of script
+    print(email_body)
+
     # Attach file
     filenames = [filename]
     if devices_no_connect:
@@ -214,6 +217,7 @@ def send_email(filename, devices_no_connect, filename_logs):
         except Exception:
             logging.error(f"Failed to attach {file_to_attach} to email", exc_info=True)
 
+    # Send email
     try:
         with smtplib.SMTP(smtp_server, smtp_port) as server:
             server.starttls()  # Upgrade the connection to TLS
@@ -225,12 +229,18 @@ def send_email(filename, devices_no_connect, filename_logs):
 
 
 if __name__ == "__main__":
+    # Get time now to calculate total runtime script in the end
     start_time = datetime.now()
+
+    # Check if directories for logs and xlsx reports exists, if not create them
+    os.makedirs("logs/detailed", exist_ok=True)
+    os.makedirs("logs/session", exist_ok=True)
+    os.makedirs("reports/", exist_ok=True)
+
     # Load environment variables, store username and password if present, otherwise prompt for input
     load_dotenv()
-    username = (
-        os.getenv("USERNAME_SSH") if os.getenv("USERNAME_SSH") else get_username()
-    )
+    username =  os.getenv("USERNAME_SSH") if os.getenv("USERNAME_SSH") else get_username()
+    
     password = os.getenv("PASSWORD_SSH") if os.getenv("PASSWORD_SSH") else getpass()
 
     # Enable logging, put logging level on DEBUG if you want more detail
