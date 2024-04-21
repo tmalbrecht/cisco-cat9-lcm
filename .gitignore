@@ -1,5 +1,3 @@
-todo.txt
-
 # Python virtual environment
 .venv
 
@@ -7,11 +5,14 @@ todo.txt
 devices.yml
 
 #Logs
+/logs/
 *.log
 
 #Reports
+/reports/
 *.xlsx
 
 #Environment variables
 .env
 
+todo.txt
