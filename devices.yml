@@ -1,0 +1,17 @@
+---
+cisco_1:
+  device_type: cisco_xe
+  host: 192.168.178.44
+  
+cisco_2:
+  device_type: cisco_xe
+  host: 192.168.178.46
+
+cisco_3:
+  device_type: cisco_xe
+  host: 192.168.178.47
+
+cisco:
+  - cisco_1
+  - cisco_2
+  - cisco_3
