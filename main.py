@@ -178,12 +178,12 @@ def create_email_body(devices_no_connect):
         # Command line output with result of script
         print(email_body)
         print("Report has been generated and stored in the /reports/ directory.")
-        
+
     return email_body
 
 
 # Send email with report as attachment
-def send_email(filename, devices_no_connect, filename_logs,email_password):
+def send_email(filename, devices_no_connect, filename_logs, email_password):
     sender_email = os.getenv("SENDER_EMAIL")
     password_email = email_password
     receiver_email = os.getenv("RECEIVER_EMAIL")
@@ -198,7 +198,6 @@ def send_email(filename, devices_no_connect, filename_logs,email_password):
     message["To"] = receiver_email
     message["Subject"] = "LCM Report Cisco Catalyst"
     message.attach(MIMEText(email_body, "plain"))
-
 
     # Attach file
     filenames = [filename]
@@ -229,7 +228,9 @@ def send_email(filename, devices_no_connect, filename_logs,email_password):
             print("Email sent successfully with attachment.")
     except Exception:
         logging.error("Failed to send email", exc_info=True)
-        print("Failed to send email, check logging in /logs/detailed/ for more details.")
+        print(
+            "Failed to send email, check logging in /logs/detailed/ for more details."
+        )
 
 
 if __name__ == "__main__":
@@ -243,11 +244,13 @@ if __name__ == "__main__":
 
     # Load environment variables, store username and password if present, otherwise prompt for input
     load_dotenv()
-    username =  os.getenv("USERNAME_SSH") if os.getenv("USERNAME_SSH") else get_username()
+    username = (
+        os.getenv("USERNAME_SSH") if os.getenv("USERNAME_SSH") else get_username()
+    )
     password = os.getenv("PASSWORD_SSH") if os.getenv("PASSWORD_SSH") else getpass()
     email_password = ""
     if os.getenv("PASSWORD_EMAIL"):
-        email_password = os.getenv("PASSWORD_EMAIL") 
+        email_password = os.getenv("PASSWORD_EMAIL")
     else:
         print("Fill in the email password:")
         getpass()
@@ -280,7 +283,7 @@ if __name__ == "__main__":
             devices_no_connect.append(device_name)
 
     # Send email with LCM report as attachment
-    send_email(filename, devices_no_connect, filename_logs,email_password)
+    send_email(filename, devices_no_connect, filename_logs, email_password)
 
     # Add total runtime script to logging
     end_time = datetime.now()
