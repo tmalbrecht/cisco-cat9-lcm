@@ -4,79 +4,128 @@
 
 # Life Cycle Management for Cisco Catalyst 9000 switches
 
-This code will retrieve life cycle management infromation from all types of Cisco Catalyst 9000 series switches. It will create an excell sheet and send it to a desired email address. Logging is generated. See logging section below.
+This script is designed to extract lifecycle management information from all types of Cisco Catalyst 9000 series switches. It will generate an Excel spreadsheet with the collected data and send it to a specified email address.
 
+The Excel sheet will include the following information:
 
-Following information will be included in the excell sheet:
-
-  * Software version
-  * Hardware model
-  * Uptime
-  * Serial number
-  * MAC
-  * Is smart licensing enabled?
-  * Licensing transport method
-  * Licensing last ack
-  * Is trust code installed?
+ * Software Version
+ * Hardware Model
+ * Uptime
+ * Serial Number
+ * MAC Address
+ * Smart Licensing Status
+ * Licensing Transport Method
+ * Last Licensing Acknowledgment
+ * Trust Code Installation Status
 
 ## Code logic
 
-This code uses Netmiko for all switch communication and sends the following commands. 
+This script utilizes Netmiko for communication (ssh) with all switches, executing the following commands:
 
   * show version
   * show license all
 
-The Genie library is used for parsing the output from the commands above to stuctured data. The openpyxl library is used to generatle the xlsx file. The smtplib library is used for sending the email. 
+It employs the Genie library to parse the output from these commands into structured data. The openpyxl library is used to generate the Excel file, while smtplib manages the email sending process.
 
-The code can deal with chassis and stacked switches. If a switch is a stack it will retrieve mac and serial number from everry switch in the stack and store it in the excell sheet.
+The code is equipped to handle both chassis and stacked switches. In the case of stacked switches, it retrieves the MAC and serial numbers from each switch in the stack and records this information in the Excel sheet.
 
 ## Getting Started
 
 ### Prerequisites
 
-The things you need before installing the software:
+Before installing the software, ensure you have the following prerequisites:
 
-* Linux environment: The code uses the pyATS Genie library for parsing. Genie is only supported in Linux.
-* Python 3.11.0rc1 (code is developed in this version, didn't test it in other versions but anything older should be fine)
-* Check the requirements.txt file for all the libraries you need, best practice is to use a seperate venv.
+ * Linux Environment: The script utilizes the pyATS Genie library for parsing, which is only supported on Linux platforms.
+ * Python Version: The code is developed in Python 3.11.0rc1. Although it has not been tested on other versions, newer versions should generally be compatible.
+ * Library Dependencies: Refer to the requirements.txt file for all necessary libraries. It is recommended to use a separate virtual environment (venv) for installation to avoid conflicts with existing packages.
   
 ### Installation
 
-Move to a directory where you want to store the repository and type the following command:
+Go to the directory where you intend to save the repository and execute the following command:
 
 ```
-$ git clone https://github.com/tmalbrecht/cisco-cat9-lcm.git
+git clone https://github.com/tmalbrecht/cisco-cat9-lcm.git
 ```
 
-Install all necessary libraries (make sure to use a venv):
+Move into the directory and setup a Python virtual environment:
 
 ```
-$ pip3 install -r requirements.txt
+cd cisco-cat9-lcm
+python3 -m venv venv 
+source venv/bin/activate
 ```
 
-Create devices.yaml file and add switch details, example file is included in this GitHub repository.
+Install all required libraries:
 
-Create .env file and fill in all your details like credentials and smtp info, example file is included in this GitHub repository.
+```
+pip3 install -r requirements.txt
+```
 
-Create the following directories:
-  * /logs/
-  * /logs/session/
-  * /logs/detailed/
-  * /reports/
-    
-Code will fail if they are not present.
+Create the devices.yml file and edit it:
+```
+touch devices.yml
+nano devices.yml
+```
+
+Enter your switch details into the file as shown below; you can copy and paste them directly into nano:
+
+```
+---
+cisco_1:
+  device_type: cisco_xe
+  host: 192.168.178.45
+
+cisco_2:
+  device_type: cisco_xe
+  host: 192.168.178.46
+
+cisco_3:
+  device_type: cisco_xe
+  host: 192.168.178.47
+
+cisco:
+  - cisco_1
+  - cisco_2
+  - cisco_3
+```
+Close the file by typing ctrl + x, type 'y' and after press enter.
+
+Create the .env file and edit it:
+```
+touch devices.yml
+nano devices.yml
+```
+
+Enter your credentials and email details into the file as shown below; you can copy and paste them directly into nano:
+```
+# Credentials used for login into the switches by ssh
+PASSWORD_SSH ="username"
+USERNAME_SSH ="password"
+
+# Details needed for sending the email
+SENDER_EMAIL = "email@example.nl"
+PASSWORD_EMAIL = "your email password"
+RECEIVER_EMAIL = "email@example.nl"
+SMTP_SERVER = "smtp.your_server.com"
+SMTP_PORT = "587"
+```
+Close the file by typing ctrl + x, type 'y' and after press enter.
+
+## Security 
+
+Please ensure that your credentials and email details are not stored in a script within a directory where others have read permissions. If the SSH login credentials for the switch are not specified in the .env file, you will be prompted to enter them. The getpass() function is used to securely handle your password, ensuring it remains hidden at all times.
 
 ## Logging
 
-When running the code, logs are created and stored in the /logs/ directory. This directory needs to be inside your code directory or adjust in code if desired. 
+When the code is executed, it generates logs that are stored in the /logs/ directory. If this directory does not already exist, it will be automatically created within the script directory.
 
 The following logs are created:
-  * Session logs : The excact output from every switch connection is stored into the directory /logs/session/
-  * Detailed log : Will show if retrieving information from every switch was succesfull or not. If not it will show why it possibly failed. This logging is stored into the directory /logs/detailed/.
+  * Session Logs: These logs capture the exact output from each switch connection and are stored in the /logs/session/ directory.
+  * Detailed Log: This log details whether the retrieval of information from each switch was successful. If unsuccessful, it provides possible reasons for the failure. These logs are stored in the /logs/detailed/ directory.
 
-This detailed log file is icluded in the email if the script failed to retrieve information from one or more switches. 
+If the script fails to retrieve information from one or more switches, the detailed log file is included in the email notification. 
 
-The detailed logs name is a timestamp that shows when the script was executed. The session logs name is the device name + a timestamp that shows when connection was made with the switch.
+The filename for the detailed logs includes a timestamp indicating when the script was executed. Session logs are named using the device name followed by a timestamp that marks the exact moment the connection was made with the switch.
 
 ## Usage
 
@@ -86,9 +135,9 @@ Navigate into the project directory and execute main.py:
 $ python main.py
 ```
 
-If you have not filled in any credentials for switch login inside the .env file it will prompt you for the credentials. For password getpass() is used to keep it hidden.
+If you haven't entered any credentials for switch login in the .env file, you will be prompted to provide them. The getpass() function is used to ensure that your password remains hidden.
 
-Check your email. The generated xlsx file will also be stored in the /reports/ directory inside the code directory. Check logs if there are any issues.
+Please check your email for the generated Excel file, which is also saved in the /reports/ directory within the code directory. Refer to the logs for any issues that may have occurred.
 
 
 
