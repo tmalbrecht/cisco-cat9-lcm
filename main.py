@@ -129,14 +129,21 @@ def send_command(net_connect, command):
     return output
 
 
+def delete_empty_log_files(file_path):
+    if os.path.exists(file_path) and os.stat(file_path).st_size == 0:
+        os.remove(file_path)
+
+
 # Handle connection to network device, return boolean True when connection was succesfull and false if otherwhise
 def connect_to_device(device, username, password, device_name, filename):
+    log_file_name = get_log_name(device_name)
     device["username"] = username
     device["password"] = password
-    device["session_log"] = get_log_name(device_name)
+    device["session_log"] = log_file_name
     ip = device["host"]
     logging.info("*" * 60)
-    logging.info(f"Starting connection to device: {device_name} ({ip})")
+    logging.info(f"Starting connection to switch: {device_name} ({ip})")
+    print(f"\nStarting connection to switch: {device_name} ({ip})")
     logging.info("*" * 60)
     net_connect = ConnLogOnly(**device)
     output_list = []
@@ -150,11 +157,14 @@ def connect_to_device(device, username, password, device_name, filename):
                 cmd_ok = False
         write_output_xlsx(filename, output_list, device_name)
         net_connect.disconnect()
-        logging.info(f"Successfully closed connection to device: {device_name} ({ip})")
+        logging.info(f"Successfully closed connection to switch: {device_name} ({ip})")
+        print(f"Successfully closed connection to switch: {device_name} ({ip})")
         if not cmd_ok:
             return False
         return True
     write_output_xlsx(filename, output_list, device_name)
+    delete_empty_log_files(log_file_name)
+    print(f"Couldn't connect to switch: {device_name} ({ip})")
     return False
 
 
@@ -165,19 +175,37 @@ def get_username():
     return username
 
 
-def create_email_body(devices_no_connect):
+def yes_or_no(prompt):
+    valid_responses = {"y": True, "n": False}
+    while True:
+        # Convert the user's input to lowercase to standardize the comparison
+        user_input = input(prompt).strip().lower()
+        if user_input in valid_responses:
+            return valid_responses[user_input]
+        else:
+            print("Invalid input. Please enter 'y' or 'n'.")
+
+
+# Create message with how the script performed
+def create_summary_message(devices_no_connect):
+    print("")
     if devices_no_connect:
         email_body = "Couldn't connect or retrieve desired information from the following switche(s): "
         for device in devices_no_connect:
             email_body += f"\n  *{device}"
-        email_body += "\nCheck logging for more details."
+        email_body += (
+            "\n\nCheck logging files in the /logs/ directory for more details."
+        )
+        print(email_body)
+        print("\nReport has been generated and stored in the /reports/ directory.")
+
     else:
         email_body = (
-            "Connecting and retrieving information from all switches was successfull."
+            "\nConnecting and retrieving information from all switches was successfull."
         )
         # Command line output with result of script
         print(email_body)
-        print("Report has been generated and stored in the /reports/ directory.")
+        print("\nReport has been generated and stored in the /reports/ directory.")
 
     return email_body
 
@@ -189,7 +217,7 @@ def send_email(filename, devices_no_connect, filename_logs, email_password):
     receiver_email = os.getenv("RECEIVER_EMAIL")
     smtp_server = os.getenv("SMTP_SERVER")
     smtp_port = os.getenv("SMTP_PORT")
-    email_body = create_email_body(devices_no_connect)
+    email_body = create_summary_message(devices_no_connect)
     logging.info(email_body)
 
     # Create email
@@ -225,11 +253,11 @@ def send_email(filename, devices_no_connect, filename_logs, email_password):
             server.login(sender_email, password_email)
             server.sendmail(sender_email, receiver_email, message.as_string())
             logging.info("Email sent successfully with attachment.")
-            print("Email sent successfully with attachment.")
+            print("Email was sent successfully with attachment.")
     except Exception:
         logging.error("Failed to send email", exc_info=True)
         print(
-            "Failed to send email, check logging in /logs/detailed/ for more details."
+            "Failed to send email, check logging in /logs/detailed/ directory for more details."
         )
 
 
@@ -242,18 +270,25 @@ if __name__ == "__main__":
     os.makedirs("logs/session", exist_ok=True)
     os.makedirs("reports/", exist_ok=True)
 
-    # Load environment variables, store username and password if present, otherwise prompt for input
+    # Load environment variables, store username and passwords if present, otherwise prompt for input
     load_dotenv()
     username = (
         os.getenv("USERNAME_SSH") if os.getenv("USERNAME_SSH") else get_username()
     )
     password = os.getenv("PASSWORD_SSH") if os.getenv("PASSWORD_SSH") else getpass()
+
+    # Check if an email needs to be generated or not
+    email = yes_or_no(
+        "Do you want to send an email with the results? Please enter 'y' or 'n': "
+    )
     email_password = ""
-    if os.getenv("PASSWORD_EMAIL"):
-        email_password = os.getenv("PASSWORD_EMAIL")
-    else:
-        print("Fill in the email password:")
-        getpass()
+
+    if email:
+        if os.getenv("PASSWORD_EMAIL"):
+            email_password = os.getenv("PASSWORD_EMAIL")
+        else:
+            print("Fill in the email password:")
+            getpass()
 
     # Enable logging, put logging level on DEBUG if you want more detail
     filename_logs = f"logs/detailed/{get_time()}.log"
@@ -274,7 +309,7 @@ if __name__ == "__main__":
     # Store all cisco device hostnames in a list variable
     device_list = devices_dict["cisco"]
 
-    # Loop over all device names, and connect to every device, store device names of all connections that failed
+    # Connect to every switch and store information in xlsx file, store device names of all connections that failed
     devices_no_connect = []
     for device_name in device_list:
         device = devices_dict[device_name]
@@ -282,8 +317,11 @@ if __name__ == "__main__":
         if not connect:
             devices_no_connect.append(device_name)
 
-    # Send email with LCM report as attachment
-    send_email(filename, devices_no_connect, filename_logs, email_password)
+    # Send email with LCM report as attachment or only prompt results to screen
+    if email:
+        send_email(filename, devices_no_connect, filename_logs, email_password)
+    else:
+        create_summary_message(devices_no_connect)
 
     # Add total runtime script to logging
     end_time = datetime.now()
