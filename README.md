@@ -4,7 +4,7 @@
 
 # Life Cycle Management for Cisco Catalyst 9000 switches
 
-This script is designed to extract lifecycle management information from all types of Cisco Catalyst 9000 series switches. It will generate an Excel spreadsheet with the collected data and send it to a specified email address.
+This script is designed to extract lifecycle management information from all types of Cisco Catalyst 9000 series switches. It will generate an Excel spreadsheet with the collected data and send it to a specified email address if desired.
 
 The Excel sheet will include the following information:
 
@@ -140,6 +140,8 @@ python main.py
 ```
 
 If you haven't entered any credentials for switch login or email paswword in the .env file, you will be prompted to provide them. The getpass() function is used to ensure that your passwords remain hidden.
+
+After you will get prompted with the question if you want to send an email with the report or not.
 
 Please check your email for the generated Excel file, which is also saved in the /reports/ directory within the code directory. Refer to the logs for any issues that may have occurred.
 
