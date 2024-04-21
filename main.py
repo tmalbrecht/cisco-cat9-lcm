@@ -31,7 +31,7 @@ def get_log_name(device_name):
 # Get the current local date/time and format the object to a string in a readable format
 def get_time():
     time = datetime.now()
-    time = time.strftime("%Y-%m-%d_%H:%M:%S")
+    time = time.strftime("%Y-%m-%d_%Hh%Mm")
     return time
 
 
@@ -167,21 +167,25 @@ def get_username():
 
 def create_email_body(devices_no_connect):
     if devices_no_connect:
-        email_body = "Couldn't connect or retrieve desired information from the following device(s): "
+        email_body = "Couldn't connect or retrieve desired information from the following switche(s): "
         for device in devices_no_connect:
             email_body += f"\n  *{device}"
         email_body += "\nCheck logging for more details."
     else:
         email_body = (
-            "Connecting and retrieving information from all devices was successfull."
+            "Connecting and retrieving information from all switches was successfull."
         )
+        # Command line output with result of script
+        print(email_body)
+        print("Report has been generated and stored in the /reports/ directory.")
+        
     return email_body
 
 
 # Send email with report as attachment
-def send_email(filename, devices_no_connect, filename_logs):
+def send_email(filename, devices_no_connect, filename_logs,email_password):
     sender_email = os.getenv("SENDER_EMAIL")
-    password_email = os.getenv("PASSWORD_EMAIL")
+    password_email = email_password
     receiver_email = os.getenv("RECEIVER_EMAIL")
     smtp_server = os.getenv("SMTP_SERVER")
     smtp_port = os.getenv("SMTP_PORT")
@@ -195,8 +199,6 @@ def send_email(filename, devices_no_connect, filename_logs):
     message["Subject"] = "LCM Report Cisco Catalyst"
     message.attach(MIMEText(email_body, "plain"))
 
-    # Command line output with result of script
-    print(email_body)
 
     # Attach file
     filenames = [filename]
@@ -213,9 +215,9 @@ def send_email(filename, devices_no_connect, filename_logs):
                     f'attachment; filename="{file_to_attach.split("/")[-1]}"',
                 )
             message.attach(part)
-            logging.info(f"Successfully added attachment {file_to_attach} to email")
+            logging.info(f"Successfully added attachment {file_to_attach} to email.")
         except Exception:
-            logging.error(f"Failed to attach {file_to_attach} to email", exc_info=True)
+            logging.error(f"Failed to attach {file_to_attach} to email.", exc_info=True)
 
     # Send email
     try:
@@ -223,9 +225,11 @@ def send_email(filename, devices_no_connect, filename_logs):
             server.starttls()  # Upgrade the connection to TLS
             server.login(sender_email, password_email)
             server.sendmail(sender_email, receiver_email, message.as_string())
-            logging.info("Email sent successfully with attachment")
+            logging.info("Email sent successfully with attachment.")
+            print("Email sent successfully with attachment.")
     except Exception:
         logging.error("Failed to send email", exc_info=True)
+        print("Failed to send email, check logging in /logs/detailed/ for more details.")
 
 
 if __name__ == "__main__":
@@ -240,8 +244,13 @@ if __name__ == "__main__":
     # Load environment variables, store username and password if present, otherwise prompt for input
     load_dotenv()
     username =  os.getenv("USERNAME_SSH") if os.getenv("USERNAME_SSH") else get_username()
-    
     password = os.getenv("PASSWORD_SSH") if os.getenv("PASSWORD_SSH") else getpass()
+    email_password = ""
+    if os.getenv("PASSWORD_EMAIL"):
+        email_password = os.getenv("PASSWORD_EMAIL") 
+    else:
+        print("Fill in the email password:")
+        getpass()
 
     # Enable logging, put logging level on DEBUG if you want more detail
     filename_logs = f"logs/detailed/{get_time()}.log"
@@ -271,7 +280,7 @@ if __name__ == "__main__":
             devices_no_connect.append(device_name)
 
     # Send email with LCM report as attachment
-    send_email(filename, devices_no_connect, filename_logs)
+    send_email(filename, devices_no_connect, filename_logs,email_password)
 
     # Add total runtime script to logging
     end_time = datetime.now()
