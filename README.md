@@ -92,8 +92,8 @@ Close the file by typing ctrl + x, type 'y' and after press enter.
 
 Create the .env file and edit it:
 ```
-touch devices.yml
-nano devices.yml
+touch .env
+nano .env
 ```
 
 Enter your credentials and email details into the file as shown below; you can copy and paste them directly into nano:
